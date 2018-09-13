@@ -4,9 +4,10 @@ import h5py
 import re
 from nltk.tokenize import RegexpTokenizer
 from collections import Counter
+import pickle
 """
-create a simple vocab files, it will be stored in the ../data folder with a
-json file. This script will be the baseline file to create the Voacb. 
+for small data, we use pickle to store them as pkl file, for complex and
+huge file, we will sotre them as hdf5 file.
 """
 
 def find_all_vocabs(file_path):
@@ -34,7 +35,7 @@ def preprocess(sentences):
     sentences = sentences.lower()
     tokenizer = RegexpTokenizer(r'w\+')
     tokens = tokenizer.tokenize(sentences)
-    filtered_words = list(tokens)
+    filtered_words = [w for w in tokens]
     return filtered_words
 
 
@@ -56,3 +57,15 @@ def build_vocabs(all_words, max_words_num):
         word2id[key] = i
         i += 1
     return id2word, word2id
+
+
+
+if __name__ == '__main__':
+    data_dir = '../data'
+    csv_file = os.path.join(data_dir, 'training_data.csv')
+    all_words = find_all_vocabs(csv_file)
+    id2word, word2id = build_vocabs(all_words, 50000)
+    Vocab = {'word2id':word2id, 'id2word':id2word}
+    with open(os.path.join(data_dir, 'Vocab.pkl'), 'wb') as f:
+        pickle.dump(Vocab, f)
+        print(f"the data has been saved to{data_dir}")
