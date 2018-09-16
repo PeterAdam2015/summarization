@@ -167,7 +167,7 @@ class Entry(object):
             self.enc_input.append(pad_id)
         if config.pointer_gen:
             while len(self.enc_input_extend_vocab) < max_len:
-            self.enc_input_extend_vocab.append(pad_id)
+                self.enc_input_extend_vocab.append(pad_id)
 
 def process_entry(entry):
     """[process a entry to return the features of the entry]
