@@ -68,4 +68,4 @@ if __name__ == '__main__':
     Vocab = {'word2id':word2id, 'id2word':id2word}
     with open(os.path.join(data_dir, 'Vocab.pkl'), 'wb') as f:
         pickle.dump(Vocab, f)
-        print(f"the data has been saved to{data_dir}")
+    print(f"the data has been saved to{data_dir}")
