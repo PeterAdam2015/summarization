@@ -1,20 +1,34 @@
 {
-    "git.ignoreMissingGitWarning": true,
+    // for apperaance configuration here
     "window.zoomLevel": 1,
-    "python.pythonPath": "C:\\Users\\Lonel\\Anaconda3\\python.exe",
     "workbench.iconTheme": "vscode-great-icons",
-    // for linting and other settings here
-    "files.autoSave": "afterDelay",
-    "workbench.colorTheme": "One Dark Pro",
-    "git.confirmSync": false,
-    "git.autofetch": true,
-    "editor.minimap.enabled": false,
+    
+    // for python and linting and other settings here
+    "python.pythonPath": "C:\\Users\\Lonel\\Anaconda3\\python.exe",
+    "python.linting.enabled": true,
+    
+    "python.linting.pep8Enabled": true,
+    "python.linting.pep8Args": [
+        "--disable=W293"
+    ],
+    "python.linting.pylintEnabled":false,
     "python.linting.pylintArgs": [
         "--disable-msg=E101"
     ],
 
+    // file and folder configuration
+    "files.autoSave": "afterDelay",
+    "workbench.colorTheme": "One Dark Pro",
+
+    // git configuration
+    "git.ignoreMissingGitWarning": true,
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "editor.minimap.enabled": false,
+    
     
     // the extensions setting here. 
+    // ----LATEX----- Setting
     "vsicons.dontShowNewVersionMessage": true,
     "latex-workshop.latex.tools":[
         {
