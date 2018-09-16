@@ -98,8 +98,8 @@ class Entry(object):
 
 
         # Get ids of special tokens
-        start_decoding = '<EOS>'
-        stop_decoding = '<SOS>'
+        start_decoding = word_2_id(vocab, 'SOS')
+        stop_decoding = word_2_id(vocab, 'EOS')
         # Process the article, the UNK tokens will be replaced as the
         # mapping runs, so we need to keep the all article_words here.
         # the article may not be the totally the same length here, by default
