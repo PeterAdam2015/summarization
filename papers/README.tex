@@ -1,0 +1,47 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{minted}
+\usepackage{xcolor}
+\usemintedstyle[python3]{monokai}
+\definecolor{bg}{rgb}{0.1.,0.14.,0.1}
+
+
+\begin{document}
+    This is a latex README File, we will use some addtional infromation to derive the model 
+    here, notice that we will also give some insight to the model we see and the paper we have
+    seen.
+    
+    This also include some code analysis for achiving the given algorithm and how will we use
+    the pytorch to achive the models proposed in the papers.
+    PyTorch 代码块如下所示
+
+    % we may adjust the formatting of our coding here.
+    \begin{minted}[linenos=true, mathescape, bgcolor =bg]{python3}
+    import pandas as pd
+    import os
+    import sys
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+
+    class MyModel(nn.Module):
+        """[define some args]
+        
+        Parameters
+        ----------
+        nn : [pytorch Module]
+            [description]
+        
+        """
+
+        def __init__(self, in_dim, out_dim):
+            def __init__(MyModel, self).__init__()
+            hidden_dim_ = 5
+            self.linear1 = nn.Linear(in_dim, hidden_dim_)
+            self.linear2 = nn.Linear(hidden_dim_, out_dim)
+        def forward(self):
+            pass
+        
+    \end{minted}
+
+    $$Y^2 = x^3+5\frac{x}{y^2}+4\times x + \Delta$$
+\end{document}
