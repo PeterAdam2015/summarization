@@ -10,125 +10,73 @@ from utils.create_vocab import preprocess
 # to assure that we may need some oov in the model
 import utils.config as config
 
-def create_datesets(data):
+def word_2_id(vocab, word):
+    word_2_id_ = vocab['word2id']
+    if word not in word_2_id_:
+        return word_2_id_['UNK']
+    return word_2_id_[word]
+
+def id_2_word(vocab, word_id):
+    id_2_word_ = vocab['id2word']
+    if word_id not in id_2_word_:
+        raise ValueError("Id not found in vocab: %d" % word_id)
+    return id_2_word_[word_id]
+
+def article_2_ids(article_words, vocab):
     """
-    Args:
-        the high level function to create a h5py file,
-        mode can be either train, val or test, for the
-        train mode, one can set the datasets to be a content
-        and each word will be mapping to a index, if the word
-        not in the vocabulary, then set skip this or set to
-        Unkow regard to the model's setting.
-    """
-    # we use a entry function to derive the an entry and later
-    # repetively use this function to creat the whole training data sets
-    def make_entry(article, title):
-        article_ids = word2id(article)
-        input_ids, output_ids = decoder_inputs(title, vocab)
-        return list(article_ids, input_ids, output_ids)
-    
-    train_data = []
-    for i in range(len(data)):
-        train_data.append(make_entry(data['content'][i], data['title'][i]))
-    with h5py.File('train_data.hdf5', 'w') as f:
-        f.create_dataset(name='train_data', data=train_data)
-    print("the training data has been successfully created!")
-
-
-def word2id(word, vocab):
-    word_2_id = vocab['word2id']
-    if word not in word_to_id:
-        return word_2_id['UNK']
-    return word_to_id[word]
-
-def id2word(word_id, vocab):
-    id_2_word = vocab['id2word']
-    if word_id not in id_to_word:
-        raise ValueError('Id not found in vocab: %d' % word_id)
-    return id_2_word[word_id]
-
-
-def article2ids(article_words, vocab):
-    """
-    article2ids will not only return the ids of the given  sentences, but also
-    keep the oovs in the sentences instead of filtering them out.
+    Notice this function only be implemented when using pointer-generator,
+    not implemented in navie mode. togather with the abstract_2_ids().
     """
     ids = []
     oovs = []
-    word_2_id = vocab['word2id']
-    unk_id = word_2_id['UNK']
+    unk_id = word_2_id(vocab, 'UNK')
     for w in article_words:
-    i = word2id(w, vocab)
-    if i == unk_id: # If w is OOV
-        # the oov is a unique list of out of vocabulary here.
-        if w not in oovs: # Add to list of OOVs
-        oovs.append(w)
-        oov_num = oovs.index(w) # This is 0 for the first article OOV, 1 for the second article OOV...
-        ids.append(len(word_2_id) + oov_num) # This is e.g. 50000 for the first article OOV, 50001 for the second...
-    else:
-        ids.append(i)
+        i = word_2_id(vocab, w)
+        if i == unk_id: # If w is OOV
+            if w not in oovs: # Add to list of OOVs
+            oovs.append(w)
+            oov_num = oovs.index(w) # This is 0 for the first article OOV, 1 for the second article OOV...
+            ids.append(len(vocab['word2id'])-1 + oov_num) # This is e.g. 50000 for the first article OOV, 50001 for the second...
+        else:
+            ids.append(i)
     return ids, oovs
 
 
-def abstract2ids(abstract_words, vocab, article_oovs):
+def abstract_2_ids(abstrcat_words, vocab, article_oovs):
+    """
+    Notice this function only be implemented when using pointer-generator,
+    not implemented in navie mode. togather with the article_2_ids().
+    """
     ids = []
-    word_2_id = vocab['word2id']
-    unk_id = word_2_id['UNK']
+    unk_id = word_2_id(vocab, 'UNK')
     for w in abstract_words:
-    i = vocab.word2id(w)
-    if i == unk_id: # If w is an OOV word
-        if w in article_oovs: # If w is an in-article OOV
-            vocab_idx = len(word_2_id) + article_oovs.index(w) # Map to its temporary article OOV number
-            ids.append(vocab_idx)
-        else: # If w is an out-of-article OOV
-            ids.append(unk_id) # Map to the UNK token id
-    else:
-        ids.append(i)
+        i = word_2_id(vocab, w)
+        if i == unk_id:
+            if w in article_oovs:
+                vocab_idx =len(vocab['word2id'])-1 + article_oovs.index(w)
+                ids.append(vocab_idx)
+            else:
+                ids.append(unk_id)
+        else:
+            ids.append(i)
     return ids
 
-def encoder_inputs(sentences, vocab):
-    """[encoder the sentences of a paragraph to enable them to
-    won the ids as inputs.]
 
-    Arguments:
-        sentences {list of strings} -- [each item in the string will be a
-        word or UNK token.]
-        vocab {a dictionary contain word2id and id2word} -- [description]
+def abstract2sents(abstract):
     """
-    word2id_ = vocab['word2id']
-    ids = []
-    oov = []
-    for word in sentences:
+    translate the abstract ids to a list of sentences, may be not 
+    useful in this match setting.
+    """
+    cur = 0
+    sents = []
+    while True:
         try:
-           ids.append(word2id_[word])
-        except KeyError as er:
-            if config.oov:
-                ids.append(word2id_['UNK'])
-                oov.append(word)
-            else:
-                pass
-    if config.oov:
-        return ids, oov
-    else:
-        return ids
-
-
-def decoder_inputs(title, vocab):
-    """[decoder_inputs will convert the tile to the inputs of
-    the encoder and the output of the encoder so that we will
-    have the paired sentences in the decodr]
-    
-    Parameters
-    ----------
-    title : [a list of string, each will own several ]
-        [description]
-    
-    """
-    title_id = word2id(title, vocab)
-    word_2_id = vocab['word_2_id']
-    input_ids = word_2_id['<SOS'] + title_id
-    output_ids = title_id + word_2_id['<EOS>']
-    return input_ids, output_ids
+            start_p = abstract.index('SOS', cur)
+            end_p = abstract.index('EOS', start_p + 1)
+            cur = end_p + len('EOS')
+            sents.append(abstract[start_p+len('SOS'):end_p])
+        except ValueError as e: # no more sentences
+            return sents
 
 
 class Entry(object):
@@ -162,14 +110,14 @@ class Entry(object):
             article_words = article_words[:config.max_enc_steps]
         
         self.enc_len = len(article_words) # store the length after truncation but before padding
-        self.enc_input = [word_2_id(w) for w in article_words]
+        self.enc_input = [word_2_id(vocab, w) for w in article_words]
         # enc_input will contain UNK token mapping
         # Process the abstract, the abstract conists by a lot of sentences.
         abstract = ' '.join(abstract_sentences)
         abstract_words = abstract.split()
-        abs_ids = [vocab.word2id(w) for w in abstract_words]
+        abs_ids = [word_2_id(vocab, w) for w in abstract_words]
 
-        # Get the decoder input sequence and target sequence
+        # Get the d, ecoder input sequence and target sequence
         self.dec_input, self.target = self.get_dec_inp_targ_seqs(abs_ids, config.max_dec_steps, start_decoding, stop_decoding)
         self.dec_len = len(self.dec_input)
         
@@ -178,11 +126,11 @@ class Entry(object):
         if config.pointer_gen:
             # Store a version of the enc_input where in-article OOVs are represented by
             # their temporary OOV id; also store the in-article OOVs words themselves
-            self.enc_input_extend_vocab, self.article_oovs = article2ids(article_words, vocab)
+            self.enc_input_extend_vocab, self.article_oovs = article_2_ids(article_words, vocab)
 
             # Get a verison of the reference summary where in-article OOVs are represented
             # by their temporary article OOV id
-            abs_ids_extend_vocab = data.abstract2ids(abstract_words, vocab, self.article_oovs)
+            abs_ids_extend_vocab = data.abstract_2_ids(abstract_words, vocab, self.article_oovs)
 
             # Overwrite decoder target sequence so it uses the temp article OOV ids
             _, self.target = self.get_dec_inp_targ_seqs(abs_ids_extend_vocab, config.max_dec_steps, start_decoding, stop_decoding)
@@ -220,6 +168,61 @@ class Entry(object):
         if config.pointer_gen:
             while len(self.enc_input_extend_vocab) < max_len:
             self.enc_input_extend_vocab.append(pad_id)
+
+def process_entry(entry):
+    """[process a entry to return the features of the entry]
+    
+    Parameters
+    ----------
+    entry : [Entry instance]
+    """
+    assert isinstance(entry, Entry), "the object must be a Entry instance!"
+    # question, for torch, shoud we must specify the length of the inputs ? not really
+    # we can always know the shape of the inputs by some operations.
+    entry.pad_decoder_inp_targ(config.max_dec_steps, 0)  # set padding id always be 0
+    entry.pad_decoder_inp_targ(config.max_dec_steps, 0)
+    return (entry.enc_input, entry.dec_input, entry.target)
+
+
+
+def save_features(csv_file, vocab, mode):
+    """
+    Parameters
+    ----------
+    csv_file : [path name to contain a csv file]
+        [the csv file contian either the total train data stored as a csv 
+        file with id's head look like the following:
+            id      content     title
+            1       ....        ....
+        for trian mode or the following:
+            id      content     title
+            1       ....        NULL
+        for test mode.
+        ]
+    vocab : [the vocab]
+
+    mode : [string, either train or test]
+        [for evalutaiton mode, or the dev mode, we treat them as 
+        train mode too.]
+    
+    svae the contexts and titles to the standard h5py files
+    
+    """
+    assert mode in ('train', 'test'), "the given mode is ivalid, using only train  or test!"
+    data = pd.read_csv(csv_file, encoding = 'utf-8')
+    content = list(data['content'])
+    if mode == 'train':
+        title = list(data['title'])
+    else:
+        # using a word for dummy titles.
+        title = [['title'] for i in range(len(content))]
+    list_data = list(zip(content, title))
+    features = []
+    example_lists = [Entry(entry[0], entry[1], vocab) for entry in list_data]
+    for example in example_lists:
+        # to check the features, you just need some test on the jupyter notebook
+        features.append(process_entry(example))
+        
 
 
 class SumDatasets(Dataset):
