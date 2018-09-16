@@ -6,9 +6,11 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from utils.create_vocab import preprocess
+# notice here to add a config file, we need also to use the config
+# to assure that we may need some oov in the model
+import utils.config as config
 
-
-def create_datesets():
+def create_datesets(data):
     """
     Args:
         the high level function to create a h5py file,
@@ -18,8 +20,19 @@ def create_datesets():
         not in the vocabulary, then set skip this or set to
         Unkow regard to the model's setting.
     """
-    pass
-
+    # we use a entry function to derive the an entry and later
+    # repetively use this function to creat the whole training data sets
+    def make_entry(article, title):
+        article_ids = word2id(article)
+        input_ids, output_ids = decoder_inputs(title, vocab)
+        return list(article_ids, input_ids, output_ids)
+    
+    train_data = []
+    for i in range(len(data)):
+        train_data.append(make_entry(data['content'][i], data['title'][i]))
+    with h5py.File('train_data.hdf5', 'w') as f:
+        f.create_dataset(name='train_data', data=train_data)
+    print("the training data has been successfully created!")
 
 def word2id(vocab, sentence):
     """[using mapping table vocab to map the words to ids]
@@ -65,8 +78,22 @@ def encoder_inputs(sentences, vocab):
         word or UNK token.]
         vocab {a dictionary contain word2id and id2word} -- [description]
     """
-
-    pass
+    word2id_ = vocab['word2id']
+    ids = []
+    oov = []
+    for word in sentences:
+        try:
+           ids.append(word2id_[word])
+        except KeyError as er:
+            if config.oov:
+                ids.append(word2id_['UNK'])
+                oov.append(word)
+            else:
+                pass
+    if config.oov:
+        return ids, oov
+    else:
+        return ids
 
 
 def decoder_inputs(title, vocab):

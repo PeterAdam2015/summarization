@@ -1,0 +1,70 @@
+{
+    "git.ignoreMissingGitWarning": true,
+    "window.zoomLevel": 1,
+    "python.pythonPath": "C:\\Users\\Lonel\\Anaconda3\\python.exe",
+    "workbench.iconTheme": "vscode-great-icons",
+    // for linting and other settings here
+    "files.autoSave": "afterDelay",
+    "workbench.colorTheme": "One Dark Pro",
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    "editor.minimap.enabled": false,
+    "python.linting.pylintArgs": [
+        "--disable-msg=E101"
+    ],
+
+    
+    // the extensions setting here. 
+    "vsicons.dontShowNewVersionMessage": true,
+    "latex-workshop.latex.tools":[
+        {
+            // 编译工具和命令
+            "name": "xelatex",
+            "command": "xelatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-pdf",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "pdflatex",
+            "command": "pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "bibtex",
+            "command": "bibtex",
+            "args": [
+                "%DOCFILE%"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        // command options, for the fisrt part is to use xelatex as defualt
+        // option and the xe-bob-2*xe as the other option.
+        {
+            "name": "xelatex",
+            "tools": [
+                "xelatex"
+            ]
+        },
+        {
+            "name": "xe->bib->xe->xe",
+            "tools": [
+                "xelatex",
+                "bibtex",
+                "xelatex",
+                "xelatex"
+            ]
+        }
+    ],
+    "latex-workshop.view.pdf.viewer": "tab",
+}
