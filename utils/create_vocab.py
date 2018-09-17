@@ -33,7 +33,7 @@ def find_all_vocabs(file_path):
 
 def preprocess(sentences):
     sentences = sentences.lower()
-    tokenizer = RegexpTokenizer(r'w\+')
+    tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(sentences)
     filtered_words = [w for w in tokens]
     return filtered_words
