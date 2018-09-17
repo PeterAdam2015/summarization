@@ -180,7 +180,7 @@ def process_entry(entry):
     assert isinstance(entry, Entry), "the object must be a Entry instance!"
     # question, for torch, shoud we must specify the length of the inputs ? not really
     # we can always know the shape of the inputs by some operations.
-    entry.pad_encoder_input(config.max_dec_steps, 0)  # set padding id always be 0
+    entry.pad_encoder_input(config.max_enc_steps, 0)  # set padding id always be 0
     entry.pad_decoder_inp_targ(config.max_dec_steps, 0)
     return (entry.enc_input, entry.dec_input, entry.target)
 
