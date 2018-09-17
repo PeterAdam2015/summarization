@@ -222,6 +222,9 @@ def save_features(csv_file, vocab, mode):
     for example in example_lists:
         # to check the features, you just need some test on the jupyter notebook
         features.append(process_entry(example))
+    return features
+    # with h5py.File('features', 'w') as f:
+    #     f.create_dataset()
         
 
 
