@@ -9,6 +9,7 @@ from utils.create_vocab import preprocess
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
 import utils.config as config
+from tqdm import tqdm
 
 def word_2_id(vocab, word):
     word_2_id_ = vocab['word2id']
@@ -219,7 +220,8 @@ def save_features(csv_file, vocab, mode):
     list_data = list(zip(content, title))
     features = []
     example_lists = [Entry(entry[0], entry[1], vocab) for entry in list_data]
-    for example in example_lists:
+    print("all the entries have been proc")
+    for example in tqdm(example_lists):
         # to check the features, you just need some test on the jupyter notebook
         features.append(process_entry(example))
     return features
