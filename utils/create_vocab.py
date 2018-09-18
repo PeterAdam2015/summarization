@@ -46,10 +46,10 @@ def build_vocabs(all_words, max_words_num):
     word2id = {}
     id2word = {}
     word2id['PAD']=0
-    word2id['EOS']=max_words_num+1
-    word2id['SOS']=max_words_num+2
-    word2id['UNK'] = max_words_num+3
-    id2word[0], id2word[max_words_num+1], id2word[max_words_num+2], id2word[max_words_num+3]='PAD', 'EOS', 'SOS', 'UNK'
+    word2id['EOS']=max_words_num+2
+    word2id['SOS']=max_words_num+3
+    word2id['UNK'] = max_words_num+1
+    id2word[0], id2word[max_words_num+1], id2word[max_words_num+2], id2word[max_words_num+3]='PAD', 'UNK', 'EOS', 'SOS'
     i = 1
     words_mapping = dict(words_counter.most_common(max_words_num))
     for key in words_mapping.keys():
