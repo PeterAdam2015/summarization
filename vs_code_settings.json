@@ -15,6 +15,7 @@
     "python.linting.pylintArgs": [
         "--disable-msg=E101"
     ],
+    "autoDocstring.docstringFormat": "numpy",
 
     // file and folder configuration
     "files.autoSave": "afterDelay",
@@ -36,6 +37,7 @@
             "name": "xelatex",
             "command": "xelatex",
             "args": [
+                "--shell-escape",
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
@@ -47,6 +49,7 @@
             "name": "pdflatex",
             "command": "pdflatex",
             "args": [
+                "--shell-escape",
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
@@ -78,7 +81,39 @@
                 "xelatex",
                 "xelatex"
             ]
-        }
+        },
+        {
+            "name":"pdflatex",
+            "tools":[
+                "pdflatex"
+            ]
+        },
+        {
+            "name":"pdflate->bib->pdflatex",
+            "tools":[
+                "pdflatex",
+                "bibtex",
+                "pdflatex"
+            ]
+
+        },
+        {
+            "name": "xe->bib->xe",
+            "tools": [
+                "xelatex",
+                "bibtex",
+                "xelatex"
+            ]
+        },
     ],
     "latex-workshop.view.pdf.viewer": "tab",
+
+    // for spell check
+    "spellright.configurationScope": "user",
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext"
+    ],
+    "spellright.notificationClass": "information",
 }
