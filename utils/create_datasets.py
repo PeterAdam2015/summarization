@@ -1,11 +1,11 @@
 import h5py
+import pickle
 import pandas as pd
 import os
 import random as rn
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from utils.create_vocab import preprocess
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
 import utils.config as config
@@ -282,3 +282,13 @@ class SumDatasets(Dataset):
 
     def __getitem__(self, index):
         return self.features_1[index], self.features_2[index], self.features_3[index]
+
+
+if __name__ == '__main__':
+    # step 1: create the datasets using the save_feautes
+    # but first we need just to load the Vocab in the data folder
+    data_dir = '../data'
+    with open(os.path.join(data_dir, 'Vocab.pkl'), 'rb') as f:
+        Vocab_ = pickle.load(f)
+    save_features('../data/test_data.csv', vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
+    print(f"the data has been saved to the {data_dir}")
