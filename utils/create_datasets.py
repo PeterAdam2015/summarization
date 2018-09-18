@@ -186,7 +186,20 @@ def process_entry(entry):
 
 
 
-def save_features(csv_file, vocab, mode):
+def process_strings(sentences):
+    """
+    args: strings
+    Process all the standlize strings, for example, the pipeline contains the following
+    steps:
+            lower()->tokenizer using nltk->
+    """
+    sentences = sentences.lower()
+    tokenizer = RegexpTokenizer(r'\w+')
+    tokens = tokenizer.tokenize(sentences)
+    filtered_sentences = ' '.join(tokens) 
+    return filtered_sentences
+
+def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
     """
     Parameters
     ----------
@@ -205,28 +218,48 @@ def save_features(csv_file, vocab, mode):
     mode : [string, either train or test]
         [for evalutaiton mode, or the dev mode, we treat them as 
         train mode too.]
-    
-    svae the contexts and titles to the standard h5py files
+    encoder_steps:
+                    the maximium value for encoder steps
+    decoder_steps:
+                    The maximum value for decoder steps
+    save the contexts and titles to the standard h5py files
     
     """
     assert mode in ('train', 'test'), "the given mode is ivalid, using only train  or test!"
     data = pd.read_csv(csv_file, encoding = 'utf-8')
     content = list(data['content'])
+    content = [process_strings(item) for item in content]
     if mode == 'train':
         title = list(data['title'])
     else:
         # using a word for dummy titles.
         title = [['title'] for i in range(len(content))]
+    title = [process_strings(item) for item in title]
     list_data = list(zip(content, title))
+ 
     features = []
     example_lists = [Entry(entry[0], entry[1], vocab) for entry in list_data]
     print("all the entries have been proc")
     for example in tqdm(example_lists):
         # to check the features, you just need some test on the jupyter notebook
-        features.append(process_entry(example))
-    return features
-    # with h5py.File('features', 'w') as f:
-    #     f.create_dataset()
+        features.append(list(process_entry(example)))
+    features_1 = [item[0] for item in features]
+    features_1 = np.array(features_1)
+    features_1 = np.vstack(features_1)
+    features_2 = [item[1] for item in features]
+    features_2 = np.array(features_2)
+    features_2 = np.vstack(features_2)
+    features_3 = [item[2] for item in features]
+    features_3 = np.array(features_3)
+    features_3 = np.vstack(features_3)
+    file_name = '../data/features-{}-{}-v{}.hdf5'.format(encoder_steps, decoder_steps, 2)
+    if not os.path.exists(file_name):
+        # write the file to the disks
+        with h5py.File('../data/features-600-40_v2.hdf5', 'w') as F:
+            F.create_dataset('contents', data = features_1)
+            F.create_dataset('decoder_input', data = features_2)
+            F.create_dataset('target', data = features_3)
+    print(f"HDF5 files have been successfully created")
         
 
 
@@ -236,11 +269,16 @@ class SumDatasets(Dataset):
     of the encoder is the same. this can be processed in the Entry
     """
     
-    def __init__(self):
+    def __init__(self, file_name):
         super(SumDatasets, self).__init__()
+        assert os.path.exists(file_name), f"The file {file_name} you given does not exist"
+        with h5py.File(file_name, 'r') as F:
+            self.features_1 = np.array(list(F['contents']))
+            self.features_2 = np.array(list(F['decoder_input']))
+            self.features_3 = np.array(list(F['target']))
 
     def __len__(self):
-        pass
+        return len(self.features_1)
 
-    def __getitem__(self):
-        pass
+    def __getitem__(self, index):
+        return self.features_1[index], self.features_2[index], self.features_3[index]
