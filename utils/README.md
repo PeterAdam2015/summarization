@@ -14,11 +14,6 @@ The baisc folder can be formated as the following
 │   │   ├── create_datasets.py
 │   │   ├── create_vocab.py
 │   │   ├── __init__.py
-│   │   ├── __pycache__
-│   │   │   ├── config.cpython-36.pyc
-│   │   │   ├── create_datasets.cpython-36.pyc
-│   │   │   ├── create_vocab.cpython-36.pyc
-│   │   │   └── __init__.cpython-36.pyc
 │   │   └── README.md
 │   └── vs_code_settings.json
 ├── data
