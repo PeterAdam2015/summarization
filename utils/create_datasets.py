@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
-import utils.config as config
+from utils import config
 from tqdm import tqdm
 
 def word_2_id(vocab, word):
