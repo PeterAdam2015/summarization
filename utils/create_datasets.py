@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
-import config
+from utils import config
 from tqdm import tqdm
 from nltk.tokenize import RegexpTokenizer
 
