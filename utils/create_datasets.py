@@ -280,6 +280,24 @@ class SumDatasets(Dataset):
     def __len__(self):
         return len(self.features_1)
 
+    def transform(self, features_1, features_2, features_3):
+        """do the transormation of the data, here mainly inlcude caculatating the
+        sequence length and later, sort the data by their length and finally return
+        the tensor data
+        
+        Parameters
+        ----------
+        features_1 : [the content freatures]
+            a numpy array with the last shape be confg.max_enc_step
+        features_2 : [the decoder input features]
+            with the length should be config.max_dec_step
+        features_3 : [the decoder output features]
+            with the length should be config.max_dec_step
+        
+        """
+        pass
+
+
     def __getitem__(self, index):
         return self.features_1[index], self.features_2[index], self.features_3[index]
 
