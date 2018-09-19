@@ -306,6 +306,7 @@ if __name__ == '__main__':
     # step 1: create the datasets using the save_feautes
     # but first we need just to load the Vocab in the data folder
     data_dir = '../data'
+    assert os.path.exists(os.path.join(data_dir, 'Vocab.pkl')), "the vocab must be given before create the datasets."
     with open(os.path.join(data_dir, 'Vocab.pkl'), 'rb') as f:
         Vocab_ = pickle.load(f)
     save_features('../data/test_data.csv', vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
