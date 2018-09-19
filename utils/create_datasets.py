@@ -10,6 +10,7 @@ from torch.utils.data import Dataset
 # to assure that we may need some oov in the model
 import config
 from tqdm import tqdm
+from nltk.tokenize import RegexpTokenizer
 
 def word_2_id(vocab, word):
     word_2_id_ = vocab['word2id']
