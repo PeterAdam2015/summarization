@@ -309,5 +309,5 @@ if __name__ == '__main__':
     assert os.path.exists(os.path.join(data_dir, 'Vocab.pkl')), "the vocab must be given before create the datasets."
     with open(os.path.join(data_dir, 'Vocab.pkl'), 'rb') as f:
         Vocab_ = pickle.load(f)
-    save_features('../data/test_data.csv', vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
+    save_features('../data/test_data.csv', Vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
     print(f"the data has been saved to the {data_dir}")
