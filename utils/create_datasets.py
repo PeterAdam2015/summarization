@@ -261,6 +261,7 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
             F.create_dataset('decoder_input', data = features_2)
             F.create_dataset('target', data = features_3)
     print(f"HDF5 files have been successfully created")
+    # TODO add the enc_seq_length and mask tensor 
         
 
 

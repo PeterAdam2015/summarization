@@ -15,6 +15,8 @@ SOS = 'SOS'
 PAD = 'PAD'
 NUM_WORDS = 50000
 
+embedding_dim = 100
+hidden_dim = 50
 # for the initialzier setting here:
 rand_unif_init_rang = 2
 trunc_norm_init_std = 1
