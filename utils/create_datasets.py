@@ -291,7 +291,7 @@ class SumDatasets(Dataset):
     def __len__(self):
         return len(self.features_1)
 
-    def transform(self, features_1, features_2, features_3):
+    def transform(self, features_1, features_2, features_3, features_4, features_5):
         """do the transormation of the data, here mainly inlcude caculatating the
         sequence length and later, sort the data by their length and finally return
         the tensor data
