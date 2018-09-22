@@ -253,8 +253,8 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
     features_3 = [item[2] for item in features]  # feature 3 will be the decoder input
     features_3 = np.array(features_3)
     features_3 = np.vstack(features_3)
-    features_4 = [item[3] for item in features] # feature 4 will be the decoder length
-    features_4 = np.array(features_4)
+    # features_4 = [item[3] for item in features] # feature 4 will be the decoder length
+    # features_4 = np.array(features_4)
     features_5 = [item[4] for item in features] # feature 5  will be the decoder summarization
     features_5 = np.array(features_5)
     features_5 = np.vstack(features_5)
@@ -265,7 +265,7 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
             F.create_dataset('contents', data = features_1)
             F.create_dataset('contents_len', data = features_2)
             F.create_dataset('decoder_input', data = features_3)
-            F.create_dataset('decoder_len', data=features_4)
+            # F.create_dataset('decoder_len', data=features_4)
             F.create_dataset('target', data=features_5)
     print(f"HDF5 files have been successfully created")
         
@@ -285,32 +285,42 @@ class SumDatasets(Dataset):
             self.features_1 = np.array(list(F['contents']))
             self.features_2 = np.array(list(F['contents_len']))
             self.features_3 = np.array(list(F['decoder_input']))
-            self.features_4 = np.array(list(F['decoder_len']))
-            self.features_5 = np.array(list(F['target']))
+            # self.features_4 = np.array(list(F['decoder_len']))
+            self.features_4 = np.array(list(F['target']))
 
     def __len__(self):
         return len(self.features_1)
 
-    def transform(self, features_1, features_2, features_3, features_4, features_5):
-        """do the transormation of the data, here mainly inlcude caculatating the
-        sequence length and later, sort the data by their length and finally return
-        the tensor data
+    def transform(self, features_1, features_2, features_3, features_4):
+        """
+        To transform the data to the format, we need to order the data in the sequences of length
+        ,so we can later utilize the data in the NN model with the pack_paded_sequences and pad_packed_sequences.
         
         Parameters
         ----------
-        features_1 : [the content freatures]
-            a numpy array with the last shape be confg.max_enc_step
-        features_2 : [the decoder input features]
-            with the length should be config.max_dec_step
-        features_3 : [the decoder output features]
-            with the length should be config.max_dec_step
-        
+         
         """
-        pass
-
+        assert isinstance(features_1, torch.Tensor), "You must give the data to tensor object"
+        batch_size = features_1.size(0)
+        if batch_size == 1:
+            pass
+        else:
+            sorted_length, sorted_idx = features_2.sort()  # sort will return both the ascending sorted value and also the sorted index
+            reverse_idx = torch.linspace(batch_size - 1, 0, batch_size)  # this will contain the batch_size-1
+            sorted_length, sorted_idx = sorted_length[reverse_idx], sorted_idx[reverse_idx]
+            features_1 = features_1[sorted_idx]
+            features_2 = features_2[sorted_idx]
+            features_3 = features_3[sorted_idx]
+            features_4 = features_4[sorted_idx]
+        return features_1, features_2, features_3, features_4
 
     def __getitem__(self, index):
-        return self.features_1[index], self.features_2[index], self.features_3[index], self.features_4[index], self.features_5[index]
+        features_1, features_2 = self.features_1[index], self.features_2[index]
+        features_3, features_4 = self.features_3[index], self.features_4[index]
+        # convert to torch datasets
+        features_1, features_2 = torch.from_numpy(features_1).long(), torch.from_numpy(features_2).long()
+        features_3, features_4 = torch.from_numpy(features_3).long(), torch.from_numpy(features_4).long()
+        return self.transform(features_1, features_2, features_3, features_4)
 
 
 if __name__ == '__main__':
