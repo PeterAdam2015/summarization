@@ -282,11 +282,16 @@ class SumDatasets(Dataset):
         assert os.path.exists(file_name), f"The file {file_name} you given does not exist"
         with h5py.File(file_name, 'r') as F:
             # flixly make the datasets, via key-value feature
-            self.features_1 = np.array(list(F['contents']))
-            self.features_2 = np.array(list(F['contents_len']))
-            self.features_3 = np.array(list(F['decoder_input']))
+            self.features_1 = np.vstack(np.array(list(F['contents'])))
+            self.features_2 = np.vstack(np.array(list(F['contents_len'])))
+            self.features_2 = np.squeeze(self.features_2)
+            self.features_3 = np.vstack(np.array(list(F['decoder_input'])))
+            self.features_3 = np.squeeze(self.features_3)
             # self.features_4 = np.array(list(F['decoder_len']))
-            self.features_4 = np.array(list(F['target']))
+            self.features_4 = np.vstack(np.array(list(F['target'])))
+        print("The shape of the features_1 is {}".format(self.features_1.shape))
+        print("The shape of the features_2 is {}".format(self.features_2.shape))
+        print("The shape of the features_3 is {}".format(self.features_3.shape))
 
     def __len__(self):
         return len(self.features_1)
@@ -306,8 +311,9 @@ class SumDatasets(Dataset):
             pass
         else:
             sorted_length, sorted_idx = features_2.sort()  # sort will return both the ascending sorted value and also the sorted index
-            reverse_idx = torch.linspace(batch_size - 1, 0, batch_size)  # this will contain the batch_size-1
+            reverse_idx = torch.linspace(batch_size - 1, 0, batch_size).long()  # this will contain the batch_size-1
             sorted_length, sorted_idx = sorted_length[reverse_idx], sorted_idx[reverse_idx]
+            print(sorted_length, sorted_idx)
             features_1 = features_1[sorted_idx]
             features_2 = features_2[sorted_idx]
             features_3 = features_3[sorted_idx]
@@ -320,6 +326,9 @@ class SumDatasets(Dataset):
         # convert to torch datasets
         features_1, features_2 = torch.from_numpy(features_1).long(), torch.from_numpy(features_2).long()
         features_3, features_4 = torch.from_numpy(features_3).long(), torch.from_numpy(features_4).long()
+        if len(features_1.size()) == 1: # if we only have one item, write it to
+            features_1.unsqueeze_(0), features_3.unsqueeze_(0), features_4.unsqueeze_(0)
+        print(features_1.shape, features_2.shape, features_3.shape, features_4.shape)
         return self.transform(features_1, features_2, features_3, features_4)
 
 
