@@ -183,7 +183,7 @@ def process_entry(entry):
     # we can always know the shape of the inputs by some operations.
     entry.pad_encoder_input(config.max_enc_steps, 0)  # set padding id always be 0
     entry.pad_decoder_inp_targ(config.max_dec_steps, 0)
-    return (entry.enc_input, entry.dec_input, entry.target)
+    return (entry.enc_input, entry.enc_len, entry.dec_input, entry.dec_len, entry.target)
 
 
 
@@ -244,22 +244,29 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
     for example in tqdm(example_lists):
         # to check the features, you just need some test on the jupyter notebook
         features.append(list(process_entry(example)))
-    features_1 = [item[0] for item in features]
+    features_1 = [item[0] for item in features]  # feature 1 will be the encoder input
     features_1 = np.array(features_1)
-    features_1 = np.vstack(features_1)
-    features_2 = [item[1] for item in features]
+    features_1 = np.vstack(features_1)  
+    features_2 = [item[1] for item in features]  # feature 2 will be the encoder length
     features_2 = np.array(features_2)
     features_2 = np.vstack(features_2)
-    features_3 = [item[2] for item in features]
+    features_3 = [item[2] for item in features]  # feature 3 will be the decoder input
     features_3 = np.array(features_3)
     features_3 = np.vstack(features_3)
+    # features_4 = [item[3] for item in features] # feature 4 will be the decoder length
+    # features_4 = np.array(features_4)
+    features_5 = [item[4] for item in features] # feature 5  will be the decoder summarization
+    features_5 = np.array(features_5)
+    features_5 = np.vstack(features_5)
     file_name = '../data/features-{}-{}-v{}.hdf5'.format(encoder_steps, decoder_steps, 2)
     if not os.path.exists(file_name):
         # write the file to the disks
         with h5py.File('../data/features-600-40_v2.hdf5', 'w') as F:
             F.create_dataset('contents', data = features_1)
-            F.create_dataset('decoder_input', data = features_2)
-            F.create_dataset('target', data = features_3)
+            F.create_dataset('contents_len', data = features_2)
+            F.create_dataset('decoder_input', data = features_3)
+            # F.create_dataset('decoder_len', data=features_4)
+            F.create_dataset('target', data=features_5)
     print(f"HDF5 files have been successfully created")
         
 
@@ -274,33 +281,46 @@ class SumDatasets(Dataset):
         super(SumDatasets, self).__init__()
         assert os.path.exists(file_name), f"The file {file_name} you given does not exist"
         with h5py.File(file_name, 'r') as F:
+            # flixly make the datasets, via key-value feature
             self.features_1 = np.array(list(F['contents']))
-            self.features_2 = np.array(list(F['decoder_input']))
-            self.features_3 = np.array(list(F['target']))
+            self.features_2 = np.array(list(F['contents_len']))
+            self.features_3 = np.array(list(F['decoder_input']))
+            # self.features_4 = np.array(list(F['decoder_len']))
+            self.features_4 = np.array(list(F['target']))
 
     def __len__(self):
         return len(self.features_1)
 
-    def transform(self, features_1, features_2, features_3):
-        """do the transormation of the data, here mainly inlcude caculatating the
-        sequence length and later, sort the data by their length and finally return
-        the tensor data
+    def transform(self, features_1, features_2, features_3, features_4):
+        """
+        To transform the data to the format, we need to order the data in the sequences of length
+        ,so we can later utilize the data in the NN model with the pack_paded_sequences and pad_packed_sequences.
         
         Parameters
         ----------
-        features_1 : [the content freatures]
-            a numpy array with the last shape be confg.max_enc_step
-        features_2 : [the decoder input features]
-            with the length should be config.max_dec_step
-        features_3 : [the decoder output features]
-            with the length should be config.max_dec_step
-        
+         
         """
-        pass
-
+        assert isinstance(features_1, torch.Tensor), "You must give the data to tensor object"
+        batch_size = features_1.size(0)
+        if batch_size == 1:
+            pass
+        else:
+            sorted_length, sorted_idx = features_2.sort()  # sort will return both the ascending sorted value and also the sorted index
+            reverse_idx = torch.linspace(batch_size - 1, 0, batch_size)  # this will contain the batch_size-1
+            sorted_length, sorted_idx = sorted_length[reverse_idx], sorted_idx[reverse_idx]
+            features_1 = features_1[sorted_idx]
+            features_2 = features_2[sorted_idx]
+            features_3 = features_3[sorted_idx]
+            features_4 = features_4[sorted_idx]
+        return features_1, features_2, features_3, features_4
 
     def __getitem__(self, index):
-        return self.features_1[index], self.features_2[index], self.features_3[index]
+        features_1, features_2 = self.features_1[index], self.features_2[index]
+        features_3, features_4 = self.features_3[index], self.features_4[index]
+        # convert to torch datasets
+        features_1, features_2 = torch.from_numpy(features_1).long(), torch.from_numpy(features_2).long()
+        features_3, features_4 = torch.from_numpy(features_3).long(), torch.from_numpy(features_4).long()
+        return self.transform(features_1, features_2, features_3, features_4)
 
 
 if __name__ == '__main__':

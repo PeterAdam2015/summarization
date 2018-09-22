@@ -68,26 +68,57 @@ class Encoder(nn.Module):
         """
 
         super(Encoder, self).__init__()
-        self.embedding_dim = embedding_dim
+        self.embedding_dim = config.embedding_dim
+        self.hidden_dim = config.hidden_dim
         self.embedding = nn.Embedding(config.NUM_WORDS+1, self.embedding_dim, padding_idx=0)
         init_wt_unif(self.embedding)
         self.lstm = nn.LSTM(self.embedding_dim, self.hidden_dim)
         init_lstm_wt(self.lstm)
 
-    def forward(self, x, seq_lens):
+    def forward(self, x):
         """forward implementation of the encoder
         
         Parameters
         ----------
         x : [tensor]
             [with the shape been batch_size, max_enc_steps, embedding_dim]
-        seq_lens: [tensor]
-            [with the length of the x for no-pad ids, the order for the seq_lens should be
-            descending order.]
-        
+        if we don't use the variant length of the input sequences.
         """
         embeded_x = self.embedding(x)
-        packed_x = pack_padded_sequence(embeded_x, seq_lens, batch_first=True)
         output, hidden = self.lstm(packed_x)
-        h, _ = pad_packed_sequence(output, seq_lens, batch_first=True)
+        h = output.contiguous()
+        max_h = h.max(dim=1)
+        return h, hidden, max_h
+    
+class ReduceState(nn.Module):
+    def __init__(self):
+        super(ReduceState, self).__init__()
+        self.reduce_h = nn.Linear(2 * config.hidden_dim, config.hidden_dim)
+        init_linear_wt(self.reduce_h)
+        self.reduce_c = nn.Linear(2*config.hidden_dim, config.hidden_dim)
+        init_linear_wt(self.reduce_c)
+    
+    def forward(self, hidden):
+        """
+        by default, the bidirectional has been applied, so the output tensor of the
+        LSTM should be bi*batch_szie*output_hidden_dim, this function will implement the
+        non-linearty and also the linear mapping from bidirectional hidden dimension to
+        sigal hidden dimension.
         
+        Parameters
+        ----------
+        hidden : [type]
+            [a tuple contain both final hidden state and cell state.]
+        
+        Returns
+        -------
+        [type]
+            reduced hidden state after mapping and non-linearty.
+        """
+    
+        h_, c_ = hidden
+        hidden_reduced_h = F.relu(self.reduce_h(h_.view(-1, config.hidden_dim*2)))
+        hidden_reduced_c = F.relu(self.reduce_c(c_.view(-1, config.hidden_dim*2)))
+        # using unsqueeze to add one additional dimension here.
+        return (hidden_reduced_h.unsqueeze(0), hidden_reduced_c.unsqueeze(0))
+
