@@ -87,7 +87,7 @@ class Encoder(nn.Module):
         embeded_x = self.embedding(x)
         output, hidden = self.lstm(packed_x)
         h = output.contiguous()
-        max_h = h.max(dim=1)
+        max_h = h.max(dim=1) # the maximum outputs of each time step
         return h, hidden, max_h
     
 class ReduceState(nn.Module):
@@ -122,3 +122,60 @@ class ReduceState(nn.Module):
         # using unsqueeze to add one additional dimension here.
         return (hidden_reduced_h.unsqueeze(0), hidden_reduced_c.unsqueeze(0))
 
+
+class Attention(nn.Module):
+    def __init__(self):
+        super(Attention, self).__init__()
+
+        self.W_h = nn.Linear(config.hidden_dim * 2, config.hidden_dim * 2, bias=False)
+        self.decode_proj = nn.Linear(config.hidden_dim * 2, config.hidden_dim * 2)
+        self.v = nn.Linear(config.hidden_dim * 2, 1, bias=False)
+    
+    def forward(self, s_t_hat, h, enc_padding_mask, coverage):
+
+        b, t_k, n = list(h.size())
+        h = h.view(-1, n)
+        encoder_feature = self.W_h(h)
+
+        dec_fea = self.decode_proj(s_t_hat)
+        dec_fea_expanded = dec_fea.unsqueeze(1).expand(b, t_k, n).contiguous()
+        dec_fea_expanded = dec_fea_expanded.view(-1, n)
+
+        att_features = encoder_feature + dec_fea_expanded
+        e = F.tanh(att_features)
+        scores = self.v(e)
+        scores = scores.view(-1, n)
+
+        attn_dist_ = F.softmax(scored, dim=1) * enc_padding_mask
+        normalization_factor = attn_dist_.sum(1, keepdim=True)
+        attn_dist = attn_dist_ / normalization_factor
+        # attn_dist is the weight distribution
+        attn_dist = attn_dist.unsqueeze(1)
+        h = h.view(-1, t_k, n)
+        # implement the batch matrix multiply
+        c_t = torch.bmm(attn_dist, h)
+        c_t = c_t.view(-1, config.hidden_dim * 2)
+        
+        attn_dist = attn_dist.view(-1, t_k)
+
+        return c_t, attn_dist
+
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+        self.attention_network = Attention()
+
+        self.embedding = nn.Embedding(config.NUM_WORDS + 2, config.embedding_dim)
+        init_wt_normal(self.embedding.weight)
+
+        self.x_content = nn.Linear(config.hidden_dim * 2 + config.embedding_dim, config.embedding_dim)
+        
+        self.lstm = nn.LSTM(config.embedding_dim, config.hidden_dim, num_layers=1, batch_first=True, bidirectional=False)
+        init_lstm_wt(self.lstm)
+
+        self.out1 = nn.Linear(config.hidden_dim * 3, config.hidden_dim)
+        self.out2 = nn.Linear(config.hidden_dim, config.NUM_WORDS)
+        init_linear_wt(self.out2)
+
+    def forward(self) 
