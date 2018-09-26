@@ -316,17 +316,20 @@ class SumDatasets(Dataset):
             features_2 = features_2[sorted_idx]
             features_3 = features_3[sorted_idx]
             features_4 = features_4[sorted_idx]
+        print("trainsformed finished")
         return features_1, features_2, features_3, features_4
 
     def __getitem__(self, index):
-        features_1, features_2 = self.features_1[index], self.features_2[index]
-        features_3, features_4 = self.features_3[index], self.features_4[index]
+        features_1, features_2 = np.array(self.features_1[index]), np.array(self.features_2[index])
+        features_3, features_4 = np.array(self.features_3[index]), np.array(self.features_4[index])
         # convert to torch datasets
         features_1, features_2 = torch.from_numpy(features_1), torch.from_numpy(features_2)
         features_3, features_4 = torch.from_numpy(features_3), torch.from_numpy(features_4)
         if len(features_1.size()) == 1: # if we only have one item, write it to
             features_1.unsqueeze_(0), features_3.unsqueeze_(0), features_4.unsqueeze_(0)
-        return self.transform(features_1, features_2, features_3, features_4)
+        features_1, features_2, features_3, features_4 = self.transform(features_1, features_2, features_3, features_4)
+        return features_1, features_2, features_3, features_4
+
 
 
 if __name__ == '__main__':
