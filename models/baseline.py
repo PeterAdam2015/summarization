@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from utils import config
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
-
+device = torch.device("GPU0") if torch.cuda.is_available() and config.use_gpu else torch.device("CPU")
 
 class Encoder(nn.Module):
     def __init__(self):
@@ -77,6 +77,8 @@ class BaseModel(object):
     def __init__(self, model_file_path=None, is_eval=False):
         self.encoder = Encoder()
         self.decoder = Decoder()
+        self.encoder.to(device)
+        self.decoder.to(device)
 
         if is_eval:
             self.encoder = self.encoder.eval()

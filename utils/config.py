@@ -3,7 +3,8 @@ import os
 some configuration of the entire model
 """
 
-
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # so the IDs match nvidia-smi
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # "0, 1" for multiple
 vocab_path = '../data/Vocab.pkl'
 train_path = '../data/features-600-40_v2.hdf5'
 batch_size = 300
@@ -11,7 +12,7 @@ epoches = 10
 print_every = 10
 lr = 1e-4
 oov = False
-
+use_gpu = True
 max_enc_steps = 600
 max_dec_steps = 40
 pointer_gen = False

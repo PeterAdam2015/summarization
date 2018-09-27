@@ -11,6 +11,7 @@ import utils.config as config
 
 from models import baseline
 
+use_cuda = tor
 
 def encoder_transform(features_1, features_2, features_3, features_4):
     """
