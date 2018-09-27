@@ -53,7 +53,7 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         self.embed = nn.Embedding(config.NUM_WORDS+4, config.embedding_dim)
         self.rnn = nn.LSTM(config.embedding_dim, config.hidden_dim, batch_first=True)
-        self.logits = nn.Linear(config.hidden_dim, config.NUM_WORDS, bias=False)
+        self.logits = nn.Linear(config.hidden_dim, config.NUM_WORDS+4, bias=False)
         
         
         
@@ -68,7 +68,7 @@ class Decoder(nn.Module):
         # first we need to transoform the X to be the seq_len first
         X = X.unsqueeze_(1) # just one time step, the X now shoud be batch_size*1*embeeding_dim
         outputs, hidden = self.rnn(X, hidden)
-        outputs = F.softmax(self.logits(outputs.squeeze_(1)), dim=1)
+        outputs = F.log_softmax(self.logits(outputs.squeeze_(1)), dim=1)
         return outputs, hidden
 
 
