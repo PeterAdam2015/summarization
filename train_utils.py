@@ -49,6 +49,7 @@ class Train(object):
         self.train_path = config.train_path
         self.data_loader = DataLoader(SumDatasets(self.train_path), config.batch_size, shuffle=True)
         self.criterion = nn.NLLLoss()
+        self.epoches = config.epoches
         # TODO, add tnesorflow tensorboard to visualzie the training process
 
 
@@ -67,7 +68,6 @@ class Train(object):
             state = torch.load(model_path, map_location=lambda storage, location: storage)
             start_iter = state['iter']
             start_loss = state['current_loss']
-        self.epoches = config.epoches
 
         return start_iter, start_loss
     
@@ -78,7 +78,7 @@ class Train(object):
         features_1, features_2, features_3, features_4 = encoder_transform(*features)
         outputs, hidden = self.model.encoder(features_1, features_2)
         loss = 0
-        for di in range(len(features_3.size(2))):
+        for di in range(features_3.size(0)):
             output, hidden = self.model.decoder(features_3[di], hidden)
             loss += self.criterion(output, features_4[di])
         # TODO, mask the loss in the target, to avoid the uncesssary loss computa
@@ -97,7 +97,7 @@ class Train(object):
             start_iter, epoch_loss = self.setup_train()
             print_loss_total = 0  # Reset every print_every
             for di, features in enumerate(tqdm(self.data_loader)):
-                batch_loss = train_batch(features)
+                batch_loss = self.train_batch(features)
                 print_loss_total += batch_loss
                 epoch_loss += batch_loss
                 if di % config.print_every == 0:
