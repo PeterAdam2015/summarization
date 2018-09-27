@@ -8,6 +8,7 @@ from models import baseline
 from torch.utils.data import DataLoader
 from utils.create_datasets import SumDatasets
 import utils.config as config
+import datetime
 
 from models import baseline
 
@@ -71,6 +72,22 @@ class Train(object):
 
         return start_iter, start_loss
     
+    
+    def save_model(self, average_loss, epoches):
+        state = {
+            'epoch': epoches,
+            'encoder_state_dict': self.model.encoder.state_dict(),
+            'decoder_state_dict': self.model.decoder.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+            'current_loss':average_loss
+        }
+        now = datetime.datetime.now()
+        day = now.day()
+        hour = now.hour()
+        minute = now.minute()
+        save_path = os.path.join('../data/', 'model_{}_{}_{}.pkl'.format(day, hour, minute))
+        torch.save(state, save_path)
+
 
     def train_batch(self, features):
         # to clear the gradients before training this batch
@@ -117,11 +134,13 @@ class Train(object):
                 print_loss_total += batch_loss
                 epoch_loss += batch_loss
                 if (di+1) % config.print_every == 0:
-                    print_loss_avg = print_loss_total / config.print_every / config.batch_size
+                    print_loss_avg = torch.mean(print_loss_total)
                     print_loss_total = 0
-                    print('%d have %.4f' % (di, print_loss_avg))
-            print("epoch {} : Loss:{}".format(epoch, epoch_loss/len(self.data_loader)/config.batch_size))
+                    print('iter: %d loss: %.4f' % (di, print_loss_avg))
+            print("epoch {} : Loss:{}".format(epoch, torch.mean(epoch_loss)))
             # TODO pick some sentences and show it's real value and the predicted sentences here.
+        self.save_model(torch.mean(epoch_loss), self.epoches)
+
 
 
 
