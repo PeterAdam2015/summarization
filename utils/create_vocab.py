@@ -58,7 +58,10 @@ def build_vocabs(all_words, max_words_num):
         i += 1
     return id2word, word2id
 
-
+def load_vocab(path):
+    with open(path, 'rb') as f:
+        Vocab = pickle.load(f)
+    return Vocab
 
 if __name__ == '__main__':
     data_dir = '../data'
