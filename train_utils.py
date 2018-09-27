@@ -98,18 +98,16 @@ class Train(object):
         features_3, features_4 = features_3.to(device), features_4.to(device)
         outputs, hidden = self.model.encoder(features_1, features_2)
         loss = 0
-        predict_outputs = []
         for di in range(features_3.size(0)):
             output, hidden = self.model.decoder(features_3[di], hidden)
             loss = loss + self.criterion(output, features_4[di])
-            predict_outputs.append(output)
         # TODO, mask the loss in the target, to avoid the uncesssary loss computa
         loss.backward()
         self.optimizer.step()
-        return loss, predict_outputs
+        return loss
 
 
-    def show_result(self, features):
+    def show_result(self):
         """randomly pick some feature and show both the predicted result
         and the origial results.
         
@@ -135,8 +133,7 @@ class Train(object):
         print("the length of the output is {} and the single shape of the output is {}".format(len(predict_outputs), predict_outputs[0].shape))
         print("the target value is {}".format(features_4))
         # target_sentences = [id2word[idx] for idx in feature_3 if idx != 0]
-
-
+    
     def train_epoches(self):
         """
         an epoch trianing for the training data, to loop over the entire datasets
@@ -148,7 +145,7 @@ class Train(object):
             epoch_loss = 0
             print_loss_total = 0  # Reset every print_every
             for di, features in enumerate(tqdm(self.data_loader)):
-                batch_loss, _ = self.train_batch(features)
+                batch_loss= self.train_batch(features)
                 print_loss_total += batch_loss
                 epoch_loss += batch_loss
                 if (di+1) % config.print_every == 0:
@@ -164,4 +161,5 @@ class Train(object):
 
 if __name__ == "__main__":
     train = Train()
-    train.show_result()
+    train.train_epoches()
+   # train.show_result()
