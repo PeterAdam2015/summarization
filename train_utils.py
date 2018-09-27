@@ -82,9 +82,9 @@ class Train(object):
             'current_loss':average_loss
         }
         now = datetime.datetime.now()
-        day = now.day()
-        hour = now.hour()
-        minute = now.minute()
+        day = now.day
+        hour = now.hour
+        minute = now.minute
         save_path = os.path.join('../data/', 'model_{}_{}_{}.pkl'.format(day, hour, minute))
         torch.save(state, save_path)
 
