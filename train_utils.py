@@ -91,10 +91,11 @@ class Train(object):
         an epoch trianing for the training data, to loop over the entire datasets
         
         """
+        
         for epoch in range(1, self.epoches + 1):
             # train bathes in this epoch
+            start_iter, epoch_loss = self.setup_train()
             print_loss_total = 0  # Reset every print_every
-            epoch_loss = 0
             for di, features in enumerate(tqdm(self.data_loader)):
                 batch_loss = train_batch(features)
                 print_loss_total += batch_loss
