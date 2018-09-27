@@ -88,6 +88,20 @@ class Train(object):
         self.optimizer.step()
         return loss
 
+
+    def show_result(self, feature_3, feature_4):
+        """randomly pick some feature and show both the predicted result
+        and the origial results.
+        
+        Parameters
+        ----------
+        feature_3 : original results
+            tensor with time_step*batch_szie
+        feature_4 : target tensor
+        """
+        pass
+
+
     def train_epoches(self):
         """
         an epoch trianing for the training data, to loop over the entire datasets
@@ -107,4 +121,10 @@ class Train(object):
                     print_loss_total = 0
                     print('%d have %.4f' % (di, print_loss_avg))
             print("epoch {} : Loss:{}".format(epoch, epoch_loss/len(self.data_loader)/config.batch_size))
-            
+            # TODO pick some sentences and show it's real value and the predicted sentences here.
+
+
+
+if __name__ == "__main__":
+    train = Train()
+    train.train_epoches()
