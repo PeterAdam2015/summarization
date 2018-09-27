@@ -126,7 +126,6 @@ class Train(object):
         predict_outputs = []
         for di in range(features_3.size(0)):
             output, hidden = self.model.decoder(features_3[di], hidden)
-            loss = loss + self.criterion(output, features_4[di])
             predict_outputs.append(output)
         most_like_words_index, idx = torch.topk(output, 1)
         word2id = vocab['word2id']
@@ -134,6 +133,7 @@ class Train(object):
         print("the length of the output is {} and the single shape of the output is {}".format(len(predict_outputs), predict_outputs[0].shape))
         print("the target value is {}".format(features_4))
         # target_sentences = [id2word[idx] for idx in feature_3 if idx != 0]
+    
     
     def train_epoches(self):
         """
