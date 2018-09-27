@@ -100,8 +100,8 @@ class Train(object):
                 batch_loss = self.train_batch(features)
                 print_loss_total += batch_loss
                 epoch_loss += batch_loss
-                if di % config.print_every == 0:
-                    print_loss_avg = print_loss_total / config.print_every
+                if (di+1) % config.print_every == 0:
+                    print_loss_avg = print_loss_total / config.print_every / config.batch_size
                     print_loss_total = 0
                     print('%d have %.4f' % (di, print_loss_avg))
             print("epoch {} : Loss:{}".format(epoch, epoch_loss/len(self.data_loader)/config.batch_size))

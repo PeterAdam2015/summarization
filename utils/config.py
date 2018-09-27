@@ -6,9 +6,9 @@ some configuration of the entire model
 
 vocab_path = '../data/Vocab.pkl'
 train_path = '../data/features-600-40_v2.hdf5'
-batch_size = 10
+batch_size = 300
 epoches = 10
-print_every = 1000
+print_every = 10
 lr = 1e-4
 oov = False
 
