@@ -18,7 +18,7 @@ device = torch.device("cuda:0") if torch.cuda.is_available() and use_gpu else to
 
 
 max_enc_steps = 600
-max_dec_steps = 40
+max_dec_steps = 20
 pointer_gen = False
 
 UNKNOW = 'UNK'
