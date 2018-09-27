@@ -49,7 +49,8 @@ class Train(object):
     def __init__(self):
         self.vocab = load_vocab(config.vocab_path)
         self.train_path = config.train_path
-        self.data_loader = DataLoader(SumDatasets(self.train_path), config.batch_size, shuffle=True)
+        self.data = SumDatasets(self.train_path)
+        self.data_loader = DataLoader(self.data, config.batch_size, shuffle=True)
         self.criterion = nn.NLLLoss()
         self.epoches = config.epoches
         # TODO, add tnesorflow tensorboard to visualzie the training process
@@ -116,9 +117,9 @@ class Train(object):
         features: a batch of data in self.data_loader, repeate the training precedure
         but don't update the loss and backpropgation here
         """
-        for idx, features in enumerate(self.data_loader):
-            features_1, features_2, features_3, features_4 = encoder_transform(*features)
-            break
+        features_1, features_2, features_3, features_4 = self.data[0:10]
+        features_1, features_2, features_3, features_4 = \
+        encoder_transform(features_1, features_2, features_3, features_4)
         features_1, features_2 = features_1.to(device), features_2.to(device)
         features_3, features_4 = features_3.to(device), features_4.to(device)
         outputs, hidden = self.model.encoder(features_1, features_2)
@@ -162,4 +163,4 @@ class Train(object):
 if __name__ == "__main__":
     train = Train()
     train.train_epoches()
-   # train.show_result()
+    train.show_result()
