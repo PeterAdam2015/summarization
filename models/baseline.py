@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from utils import config
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
-device = torch.device("GPU0") if torch.cuda.is_available() and config.use_gpu else torch.device("CPU")
+device = config.device
 
 class Encoder(nn.Module):
     def __init__(self):
@@ -40,8 +40,8 @@ class Encoder(nn.Module):
         hidden_c = self.reduce_(hidden_c.permute([1, 0, 2]).contiguous().view(batch_size, -1))
         hidden_s = self.reduce_(hidden_s.permute([1, 0, 2]).contiguous().view(batch_size, -1))
         
-        hidden_c.unsqueeze_(1)
-        hidden_s.unsqueeze_(1)
+        hidden_c = hidden_c.unsqueeze(1)
+        hidden_s = hidden_s.unsqueeze(1)
         # to make the hidden to be batch first and later, do the loop over time
         hidden = (hidden_c.permute([1, 0, 2]), hidden_s.permute([1, 0, 2]))
         return outputs, hidden
@@ -66,9 +66,9 @@ class Decoder(nn.Module):
         """
         X = self.embed(X)
         # first we need to transoform the X to be the seq_len first
-        X = X.unsqueeze_(1) # just one time step, the X now shoud be batch_size*1*embeeding_dim
+        X = X.unsqueeze(1) # just one time step, the X now shoud be batch_size*1*embeeding_dim
         outputs, hidden = self.rnn(X, hidden)
-        outputs = F.log_softmax(self.logits(outputs.squeeze_(1)), dim=1)
+        outputs = F.log_softmax(self.logits(outputs.squeeze(1)), dim=1)
         return outputs, hidden
 
 

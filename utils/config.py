@@ -1,4 +1,5 @@
 import os
+import torch
 """
 some configuration of the entire model
 """
@@ -10,9 +11,12 @@ train_path = '../data/features-600-40_v2.hdf5'
 batch_size = 300
 epoches = 10
 print_every = 10
-lr = 1e-4
+lr = 1e-3
 oov = False
 use_gpu = True
+device = torch.device("cuda:0") if torch.cuda.is_available() and use_gpu else torch.device("cpu")
+
+
 max_enc_steps = 600
 max_dec_steps = 40
 pointer_gen = False

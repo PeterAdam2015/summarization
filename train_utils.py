@@ -11,8 +11,7 @@ import utils.config as config
 
 from models import baseline
 
-use_cuda = tor
-
+device = config.device
 def encoder_transform(features_1, features_2, features_3, features_4):
     """
     To transform the data to the format, we need to order the data in the sequences of length
@@ -77,11 +76,13 @@ class Train(object):
         # to clear the gradients before training this batch
         self.optimizer.zero_grad()
         features_1, features_2, features_3, features_4 = encoder_transform(*features)
+        features_1, features_2 = features_1.to(device), features_2.to(device)
+        features_3, features_4 = features_3.to(device), features_4.to(device)
         outputs, hidden = self.model.encoder(features_1, features_2)
         loss = 0
         for di in range(features_3.size(0)):
             output, hidden = self.model.decoder(features_3[di], hidden)
-            loss += self.criterion(output, features_4[di])
+            loss = loss + self.criterion(output, features_4[di])
         # TODO, mask the loss in the target, to avoid the uncesssary loss computa
         loss.backward()
         self.optimizer.step()
@@ -92,10 +93,10 @@ class Train(object):
         an epoch trianing for the training data, to loop over the entire datasets
         
         """
-        
+        start_iter, start_loss = self.setup_train() 
         for epoch in range(1, self.epoches + 1):
             # train bathes in this epoch
-            start_iter, epoch_loss = self.setup_train()
+            epoch_loss = 0
             print_loss_total = 0  # Reset every print_every
             for di, features in enumerate(tqdm(self.data_loader)):
                 batch_loss = self.train_batch(features)
