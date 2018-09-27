@@ -7,7 +7,7 @@ some configuration of the entire model
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # so the IDs match nvidia-smi
 os.environ["CUDA_VISIBLE_DEVICES"] = "0" # "0, 1" for multiple
 vocab_path = '../data/Vocab.pkl'
-train_path = '../data/features-600-40_v2.hdf5'
+train_path = '../data/features-600-20-v2.hdf5'
 batch_size = 10
 epoches = 20
 print_every = 1000
@@ -18,7 +18,7 @@ device = torch.device("cuda:0") if torch.cuda.is_available() and use_gpu else to
 
 
 max_enc_steps = 600
-max_dec_steps = 40
+max_dec_steps = 20
 pointer_gen = False
 
 UNKNOW = 'UNK'

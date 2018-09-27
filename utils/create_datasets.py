@@ -261,7 +261,7 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
     file_name = '../data/features-{}-{}-v{}.hdf5'.format(encoder_steps, decoder_steps, 2)
     if not os.path.exists(file_name):
         # write the file to the disks
-        with h5py.File('../data/features-600-40_v2.hdf5', 'w') as F:
+        with h5py.File(file_name, 'w') as F:
             F.create_dataset('contents', data = features_1)
             F.create_dataset('contents_len', data = features_2)
             F.create_dataset('decoder_input', data = features_3)
