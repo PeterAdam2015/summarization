@@ -164,4 +164,4 @@ class Train(object):
 
 if __name__ == "__main__":
     train = Train()
-    train.train_epoches()
+    train.show_result()
