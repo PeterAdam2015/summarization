@@ -316,7 +316,6 @@ class SumDatasets(Dataset):
             features_2 = features_2[sorted_idx]
             features_3 = features_3[sorted_idx]
             features_4 = features_4[sorted_idx]
-        print("trainsformed finished")
         return features_1, features_2, features_3, features_4
 
     def __getitem__(self, index):
