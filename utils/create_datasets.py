@@ -295,6 +295,7 @@ class SumDatasets(Dataset):
     def __len__(self):
         return len(self.features_1)
 
+<<<<<<< HEAD
     def transform(self, features_1, features_2, features_3, features_4):
         """
         To transform the data to the format, we need to order the data in the sequences of length
@@ -318,6 +319,8 @@ class SumDatasets(Dataset):
             features_4 = features_4[sorted_idx]
         return features_1, features_2, features_3, features_4
 
+=======
+>>>>>>> e892818b640e335fc9736642881f75a1bf9f38a4
     def __getitem__(self, index):
         features_1, features_2 = np.array(self.features_1[index]), np.array(self.features_2[index])
         features_3, features_4 = np.array(self.features_3[index]), np.array(self.features_4[index])
@@ -326,7 +329,6 @@ class SumDatasets(Dataset):
         features_3, features_4 = torch.from_numpy(features_3), torch.from_numpy(features_4)
         if len(features_1.size()) == 1: # if we only have one item, write it to
             features_1.unsqueeze_(0), features_3.unsqueeze_(0), features_4.unsqueeze_(0)
-        features_1, features_2, features_3, features_4 = self.transform(features_1, features_2, features_3, features_4)
         return features_1, features_2, features_3, features_4
 
 
