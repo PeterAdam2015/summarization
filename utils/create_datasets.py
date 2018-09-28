@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
-from utils import config
+import config
 from tqdm import tqdm
 from nltk.tokenize import RegexpTokenizer
 
@@ -316,5 +316,5 @@ if __name__ == '__main__':
     assert os.path.exists(os.path.join(data_dir, 'Vocab.pkl')), "the vocab must be given before create the datasets."
     with open(os.path.join(data_dir, 'Vocab.pkl'), 'rb') as f:
         Vocab_ = pickle.load(f)
-    save_features('../data/test_data.csv', Vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
+    save_features(config.csv_path, Vocab_, 'train', config.max_enc_steps, config.max_dec_steps)
     print(f"the data has been saved to the {data_dir}")
