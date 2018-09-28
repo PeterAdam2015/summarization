@@ -64,7 +64,7 @@ class Train(object):
         initial_lr = config.lr
         if optimizer is None:
             # can we directly use the whole parameters for training?
-            self.optimizer = torch.optim.SGD(params, lr=initial_lr)
+            self.optimizer = torch.optim.Adam(params, lr=initial_lr)
         start_iter, start_loss = 0, 0
 
         # load the existing model if it exist:
@@ -104,6 +104,7 @@ class Train(object):
             output, hidden = self.model.decoder(features_3[di], hidden)
             loss = loss + self.criterion(output, features_4[di])
         # TODO, mask the loss in the target, to avoid the uncesssary loss computa
+        loss = loss / features_3.size(0)
         loss.backward()
         self.optimizer.step()
         return loss
@@ -134,8 +135,8 @@ class Train(object):
         features_4 = features_4.permute([1, 0])
         for idx, predicted in enumerate(predicted_index):
             target_sentences = [self.id2word[index] for index in np.array(features_4[idx])]
-            print(' '.join(item for item in target_sentences))
             print("+++++++++++++++++++++++")
+            print(' '.join(item for item in target_sentences))
             predicted_sentences = [self.id2word[index] for index in np.array(predicted)]
             print(' '.join(item for item in predicted_sentences))
             print("+++++++++++++++++++++++")
