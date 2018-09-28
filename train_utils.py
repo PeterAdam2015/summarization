@@ -118,23 +118,27 @@ class Train(object):
         but don't update the loss and backpropgation here
         """
         features_1, features_2, features_3, features_4 = self.data[0:10]
-        features_1, features_2, features_3, features_4 = \
-        encoder_transform(features_1, features_2, features_3, features_4)
+        features_1, features_2, features_3, features_4 = encoder_transform(features_1, features_2, features_3, features_4)
+        # train.setup_train()
         features_1, features_2 = features_1.to(device), features_2.to(device)
         features_3, features_4 = features_3.to(device), features_4.to(device)
         outputs, hidden = self.model.encoder(features_1, features_2)
         predict_outputs = []
         for di in range(features_3.size(0)):
             output, hidden = self.model.decoder(features_3[di], hidden)
-            predict_outputs.append(output)
-        most_like_words_index, idx = torch.topk(output, 1)
-        word2id = self.vocab['word2id']
-        id2word = self.vocab['id2word']
-        print("the length of the output is {} and the single shape of the output is {}".format(len(predict_outputs), predict_outputs[0].shape))
-        print("the target value is {}".format(features_4))
-        # target_sentences = [id2word[idx] for idx in feature_3 if idx != 0]
+            most_like_words_index, idx = torch.topk(output, 1)
+            predict_outputs.append(idx.data)
+        predicted_index = torch.stack(predict_outputs).contiguous().view(10, -1)
+        features_4 = features_4.permute([1, 0])
+        for idx, predicted in enumerate(predicted_index):
+            target_sentences = [id2word[index] for index in np.array(features_4[idx])]
+            display(' '.join(item for item in target_sentences))
+            print("+++++++++++++++++++++++")
+            predicted_sentences = [id2word[index] for index in np.array(predicted)]
+            display(' '.join(item for item in predicted_sentences))
+            print("+++++++++++++++++++++++")
     
-    
+
     def train_epoches(self):
         """
         an epoch trianing for the training data, to loop over the entire datasets
@@ -155,6 +159,7 @@ class Train(object):
                     print('iter: %d loss: %.4f' % (di, print_loss_avg))
             print("epoch {} : Loss:{}".format(epoch, torch.mean(epoch_loss)))
             # TODO pick some sentences and show it's real value and the predicted sentences here.
+            self.show_result()
         self.save_model(torch.mean(epoch_loss), self.epoches)
 
 
@@ -163,4 +168,3 @@ class Train(object):
 if __name__ == "__main__":
     train = Train()
     train.train_epoches()
-    train.show_result()
