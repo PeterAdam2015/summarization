@@ -134,10 +134,10 @@ class Train(object):
         features_4 = features_4.permute([1, 0])
         for idx, predicted in enumerate(predicted_index):
             target_sentences = [self.id2word[index] for index in np.array(features_4[idx])]
-            display(' '.join(item for item in target_sentences))
+            print(' '.join(item for item in target_sentences))
             print("+++++++++++++++++++++++")
             predicted_sentences = [self.id2word[index] for index in np.array(predicted)]
-            display(' '.join(item for item in predicted_sentences))
+            print(' '.join(item for item in predicted_sentences))
             print("+++++++++++++++++++++++")
     
 
