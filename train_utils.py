@@ -48,6 +48,7 @@ class Train(object):
 
     def __init__(self):
         self.vocab = load_vocab(config.vocab_path)
+        self.id2word = self.vocab['id2word']
         self.train_path = config.train_path
         self.data = SumDatasets(self.train_path)
         self.data_loader = DataLoader(self.data, config.batch_size, shuffle=True)
@@ -117,6 +118,7 @@ class Train(object):
         features: a batch of data in self.data_loader, repeate the training precedure
         but don't update the loss and backpropgation here
         """
+    
         features_1, features_2, features_3, features_4 = self.data[0:10]
         features_1, features_2, features_3, features_4 = encoder_transform(features_1, features_2, features_3, features_4)
         # train.setup_train()
@@ -131,10 +133,10 @@ class Train(object):
         predicted_index = torch.stack(predict_outputs).contiguous().view(10, -1)
         features_4 = features_4.permute([1, 0])
         for idx, predicted in enumerate(predicted_index):
-            target_sentences = [id2word[index] for index in np.array(features_4[idx])]
+            target_sentences = [self.id2word[index] for index in np.array(features_4[idx])]
             display(' '.join(item for item in target_sentences))
             print("+++++++++++++++++++++++")
-            predicted_sentences = [id2word[index] for index in np.array(predicted)]
+            predicted_sentences = [self.id2word[index] for index in np.array(predicted)]
             display(' '.join(item for item in predicted_sentences))
             print("+++++++++++++++++++++++")
     
