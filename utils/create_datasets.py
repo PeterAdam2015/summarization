@@ -115,7 +115,7 @@ class Entry(object):
         self.enc_input = [word_2_id(vocab, w) for w in article_words]
         # enc_input will contain UNK token mapping
         # Process the abstract, the abstract conists by a lot of sentences.
-        abstract = ' '.join(abstract_sentences)
+        abstract = abstract_sentences
         abstract_words = abstract.split()
         abs_ids = [word_2_id(vocab, w) for w in abstract_words]
 
