@@ -65,7 +65,7 @@ def load_vocab(path):
 
 if __name__ == '__main__':
     data_dir = '../data'
-    csv_file = os.path.join(data_dir, 'test_data.csv')
+    csv_file = os.path.join(data_dir, 'training_data.csv')
     all_words = find_all_vocabs(csv_file)
     id2word, word2id = build_vocabs(all_words, 50000)
     Vocab = {'word2id':word2id, 'id2word':id2word}
