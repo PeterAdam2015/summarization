@@ -8,7 +8,8 @@ import torch
 from torch.utils.data import Dataset
 # notice here to add a config file, we need also to use the config
 # to assure that we may need some oov in the model
-import config
+from utils import config
+#import config
 from tqdm import tqdm
 from nltk.tokenize import RegexpTokenizer
 
@@ -239,7 +240,9 @@ def save_features(csv_file, vocab, mode, encoder_steps, decoder_steps):
     list_data = list(zip(content, title))
  
     features = []
-    example_lists = [Entry(entry[0], entry[1], vocab) for entry in list_data]
+    example_lists = [Entry(entry[0], entry[1], vocab) for entry in list_data \
+                     if len(entry[1].split()) > config.min_dec_steps and \
+                     len(entry[0].split() ) > config.min_enc_steps]
     print("all the entries have been proc")
     for example in tqdm(example_lists):
         # to check the features, you just need some test on the jupyter notebook
