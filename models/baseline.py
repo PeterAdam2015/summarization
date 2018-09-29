@@ -14,7 +14,7 @@ device = config.device
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
-        self.embed = nn.Embedding(config.NUM_WORDS + 2, config.embedding_dim)
+        self.embed = nn.Embedding(config.NUM_WORDS + 2, config.embedding_dim, padding_idx=0)
         self.rnn = nn.LSTM(config.embedding_dim, config.hidden_dim, bidirectional=True)
         self.reduce_ = nn.Linear(2 * config.hidden_dim, config.hidden_dim)
         
@@ -51,7 +51,7 @@ class Decoder(nn.Module):
     # TODO: add attention mechanism
     def __init__(self):
         super(Decoder, self).__init__()
-        self.embed = nn.Embedding(config.NUM_WORDS+4, config.embedding_dim)
+        self.embed = nn.Embedding(config.NUM_WORDS+4, config.embedding_dim, padding_idx=0)
         self.rnn = nn.LSTM(config.embedding_dim, config.hidden_dim, batch_first=True)
         self.logits = nn.Linear(config.hidden_dim, config.NUM_WORDS+4, bias=False)
         

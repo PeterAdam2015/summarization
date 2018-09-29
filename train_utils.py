@@ -52,7 +52,7 @@ class Train(object):
         self.train_path = config.train_path
         self.data = SumDatasets(self.train_path)
         self.data_loader = DataLoader(self.data, config.batch_size, shuffle=True)
-        self.criterion = nn.NLLLoss(size_average=True, ignore_index=0) # ignore the padding index and make the 
+        self.criterion = nn.NLLLoss(ignore_index=0) # ignore the padding index and make the 
         self.epoches = config.epoches
         # TODO, add tnesorflow tensorboard to visualzie the training process
 
@@ -171,3 +171,4 @@ class Train(object):
 if __name__ == "__main__":
     train = Train()
     train.train_epoches()
+    train.save_model()
