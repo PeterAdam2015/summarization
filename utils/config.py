@@ -5,7 +5,8 @@ some configuration of the entire model
 """
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" # so the IDs match nvidia-smi
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" # "0, 1" for multiple
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # "0, 1" for multiple
+data_dir = '../data/'
 vocab_path = '../data/Vocab.pkl'
 csv_path = '../data/remove_duplicated_training_data.csv'
 batch_size = 1000
@@ -21,6 +22,7 @@ max_enc_steps = 600
 max_dec_steps = 10
 min_enc_steps = 30
 min_dec_steps = 2
+beam_size = 3
 pointer_gen = False
 
 train_path = '../data/features-{}-{}-v2.hdf5'.format(max_enc_steps, max_dec_steps)
