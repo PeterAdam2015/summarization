@@ -9,10 +9,12 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # "0, 1" for multiple
 data_dir = '../data/'
 vocab_path = '../data/Vocab.pkl'
 csv_path = '../data/remove_duplicated_training_data.csv'
-batch_size = 1000
-epoches = 500
-print_every = 20
+batch_size = 40
+epoches = 5000
+print_every = 5000
 lr = 1e-3
+workers = 2
+
 oov = False
 use_gpu = True
 device = torch.device("cuda:0") if torch.cuda.is_available() and use_gpu else torch.device("cpu")

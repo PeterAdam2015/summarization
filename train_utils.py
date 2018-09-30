@@ -51,7 +51,7 @@ class Train(object):
         self.id2word = self.vocab['id2word']
         self.train_path = config.train_path
         self.data = SumDatasets(self.train_path)
-        self.data_loader = DataLoader(self.data, config.batch_size, shuffle=True)
+        self.data_loader = DataLoader(self.data, config.batch_size, shuffle=True, num_workers=config.workers)
         self.criterion = nn.NLLLoss(ignore_index=0) # ignore the padding index and make the 
         self.epoches = config.epoches
         # TODO, add tnesorflow tensorboard to visualzie the training process
@@ -160,9 +160,8 @@ class Train(object):
                     print_loss_avg = torch.mean(print_loss_total)
                     print_loss_total = 0
                     print('iter: %d loss: %.4f' % (di, print_loss_avg))
-            print("epoch {} : Loss:{}".format(epoch, torch.mean(epoch_loss)))
-            # TODO pick some sentences and show it's real value and the predicted sentences here.
             self.show_result()
+            print("epoch {}: Loss: {}".format(epoch, torch.mean(epoch_loss)))
         self.save_model(torch.mean(epoch_loss), self.epoches)
 
 
