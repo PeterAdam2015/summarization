@@ -4,7 +4,7 @@ import torch
 import torchtext
 
 import seq2seq
-from seq2seq.loss import NLLLoss
+from loss import NLLLoss
 
 class Evaluator(object):
     """ Class to evaluate models with given datasets.
@@ -60,6 +60,7 @@ class Evaluator(object):
                     correct = seqlist[step].view(-1).eq(target).masked_select(non_padding).sum().item()
                     match += correct
                     total += non_padding.sum().item()
+            
 
         if total == 0:
             accuracy = float('nan')

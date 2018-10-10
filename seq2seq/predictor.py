@@ -1,7 +1,5 @@
 import torch
 from torch.autograd import Variable
-
-
 class Predictor(object):
 
     def __init__(self, model, src_vocab, tgt_vocab):
