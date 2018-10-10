@@ -1,5 +1,4 @@
 import itertools
-
 import torch
 
 class Optimizer(object):
