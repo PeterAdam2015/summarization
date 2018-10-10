@@ -4,8 +4,13 @@ basic module, like Attention (concatneat), and EncoderRNN, DecoderRNN and the ab
 you can also add some additional models here.
 
 with some attention here: The implemetntation of the encoder will impact the setting of the decoder,
-for lstm output, the hidden state will be shape (num_layers * num_directions, batch, hidden_size), so the
-encoder hidden result will be the intialize of the the decoder, so keep in line with this 
+for origianl encoder hidden state:
+h_0 of shape (num_layers * num_directions, batch, hidden_size):
+for the encoder, the output h0 will transformed as (num_layers, batch, hidden_size*num_directions),
+if you want more fliex setting, you can just add a linear layer to get the transformation, also notice that
+the birdirectionl in the encoder will also keep in line with the decoder, for decoder rnn cell just always
+use birdirectional = false. this parameter just finish the transformation in the above.
+h_n of shape (num_layers * num_directions, batch, hidden_size)
 """
 
 import random
