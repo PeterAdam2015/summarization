@@ -2,6 +2,10 @@ r"""
 all seq2seq model will be implemented here, corresponding to the seq2seq module, the module inclue some
 basic module, like Attention (concatneat), and EncoderRNN, DecoderRNN and the abstraction Seq2seq Model.
 you can also add some additional models here.
+
+with some attention here: The implemetntation of the encoder will impact the setting of the decoder,
+for lstm output, the hidden state will be shape (num_layers * num_directions, batch, hidden_size), so the
+encoder hidden result will be the intialize of the the decoder, so keep in line with this 
 """
 
 import random
@@ -139,6 +143,7 @@ class EncoderRNN(BaseRNN):
         vocab_size (int): size of the vocabulary
         max_len (int): a maximum allowed length for the sequence to be processed
         hidden_size (int): the number of features in the hidden state `h`
+        embedding_dim (int): the dimension of the embedding matrix,
         input_dropout_p (float, optional): dropout probability for the input sequence (default: 0)
         dropout_p (float, optional): dropout probability for the output sequence (default: 0)
         n_layers (int, optional): number of recurrent layers (default: 1)
@@ -166,19 +171,22 @@ class EncoderRNN(BaseRNN):
 
     """
 
-    def __init__(self, vocab_size, max_len, hidden_size,
+    def __init__(self, vocab_size, max_len, hidden_size, embedding_dim=None,
                  input_dropout_p=0, dropout_p=0,
                  n_layers=1, bidirectional=False, rnn_cell='gru', variable_lengths=False,
                  embedding=None, update_embedding=True):
         super(EncoderRNN, self).__init__(vocab_size, max_len, hidden_size,
                 input_dropout_p, dropout_p, n_layers, rnn_cell)
-
+        self.embedding_dim = embedding_dim
         self.variable_lengths = variable_lengths
-        self.embedding = nn.Embedding(vocab_size, hidden_size)
+        self.embedding = nn.Embedding(vocab_size, self.embedding_dim)
         if embedding is not None:
-            self.embedding.weight = nn.Parameter(embedding)
+            assert self.embedding_dim is not None and self.embedding.weight.size() == embedding.size(), \
+            "the expected embedding_dim shoudl be {}, but found {}".format(self.embedding.size(), embedding.size())
+            self.embedding.weight.data = embedding
+        
         self.embedding.weight.requires_grad = update_embedding
-        self.rnn = self.rnn_cell(hidden_size, hidden_size, n_layers,
+        self.rnn = self.rnn_cell(embedding_dim, hidden_size, n_layers,
                                  batch_first=True, bidirectional=bidirectional, dropout=dropout_p)
 
     def forward(self, input_var, input_lengths=None):
@@ -254,16 +262,24 @@ class DecoderRNN(BaseRNN):
     KEY_LENGTH = 'length'
     KEY_SEQUENCE = 'sequence'
 
-    def __init__(self, vocab_size, max_len, hidden_size,
+    def __init__(self, vocab_size, max_len, embedding_dim, hidden_size, 
             sos_id, eos_id,
             n_layers=1, rnn_cell='gru', bidirectional=False,
-            input_dropout_p=0, dropout_p=0, use_attention=False):
+            input_dropout_p=0, dropout_p=0, use_attention=False, embedding = None, update_embedding=False):
         super(DecoderRNN, self).__init__(vocab_size, max_len, hidden_size,
                 input_dropout_p, dropout_p,
                 n_layers, rnn_cell)
+        self.output_size = vocab_size
+        self.embedding_dim = embedding_dim
+        # the output vocabuarly size is the output_size here.
+        self.embedding = nn.Embedding(self.output_size, self.embedding_dim)
+        if embedding is not None:
+            self.embedding.weight.data = embedding
 
+        self.embedding.weight.requires_grad = update_embedding
         self.bidirectional_encoder = bidirectional
-        self.rnn = self.rnn_cell(hidden_size, hidden_size, n_layers, batch_first=True, dropout=dropout_p)
+        # for the outputs, this should be connected to the encoder output.
+        self.rnn = self.rnn_cell(self.embedding_dim, hidden_size, n_layers, batch_first=True, dropout=dropout_p)
 
         self.output_size = vocab_size
         self.max_length = max_len
@@ -273,24 +289,26 @@ class DecoderRNN(BaseRNN):
 
         self.init_input = None
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
+        
         if use_attention:
             self.attention = Attention(self.hidden_size)
 
         self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward_step(self, input_var, hidden, encoder_outputs, function):
+        # the input_var should be the shape of (batch_size, output_size)
         batch_size = input_var.size(0)
         output_size = input_var.size(1)
         embedded = self.embedding(input_var)
         embedded = self.input_dropout(embedded)
-
+        # print(embedded.shape)
         output, hidden = self.rnn(embedded, hidden)
 
         attn = None
         if self.use_attention:
             output, attn = self.attention(output, encoder_outputs)
 
+        # precicted_softmax will be the distribution on the target vocabulary
         predicted_softmax = function(self.out(output.contiguous().view(-1, self.hidden_size)), dim=1).view(batch_size, output_size, -1)
         return predicted_softmax, hidden, attn
 
@@ -304,6 +322,7 @@ class DecoderRNN(BaseRNN):
                                                              function, teacher_forcing_ratio)
         decoder_hidden = self._init_state(encoder_hidden)
 
+
         use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
         decoder_outputs = []
@@ -314,9 +333,11 @@ class DecoderRNN(BaseRNN):
             decoder_outputs.append(step_output)
             if self.use_attention:
                 ret_dict[DecoderRNN.KEY_ATTN_SCORE].append(step_attn)
+            # symbols is the maximum likelihood of the vocab in this step, batch_size length
             symbols = decoder_outputs[-1].topk(1)[1]
             sequence_symbols.append(symbols)
-
+            
+            #  judge whether this batch  is eos id
             eos_batches = symbols.data.eq(self.eos_id)
             if eos_batches.dim() > 0:
                 eos_batches = eos_batches.cpu().view(-1).numpy()
