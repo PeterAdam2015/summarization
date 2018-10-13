@@ -86,12 +86,11 @@ class Attention(nn.Module):
         # make sure that the device is the same with the attn and context
         # (batch, out_len, in_len) * (batch, in_len, dim) -> (batch, out_len, dim)
         mix = torch.bmm(attn, context)
-
         # concat -> (batch, out_len, 2*dim)
         combined = torch.cat((mix, output), dim=2)
         # output -> (batch, out_len, dim)
-        output = torch.tanh(self.linear_out(combined.view(-1, 2 * hidden_size))).view(batch_size, -1, hidden_size)
-
+        output = self.linear_out(combined.contiguous().view(-1, 2*hidden_size))
+        output = torch.tanh(output).view(batch_size, -1, hidden_size)
         return output, attn
 
 class BaseRNN(nn.Module):

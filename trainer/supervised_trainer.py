@@ -142,7 +142,7 @@ class SupervisedTrainer(object):
     
     def train(self, model, data, num_epochs=5,
               resume=False, dev_data=None,
-              optimizer=None, teacher_forcing_ratio=0):
+              optimizer=None,lr = 1e-3, teacher_forcing_ratio=0):
         """ Run training for a given model.
 
         Args:
@@ -177,8 +177,9 @@ class SupervisedTrainer(object):
         else:
             start_epoch = 1
             step = 0
+            # add the lr hyper parameters in the optimizer
             if optimizer is None:
-                optimizer = Optimizer(optim.Adam(model.parameters()), max_grad_norm=5)
+                optimizer = Optimizer(optim.Adam(model.parameters(), lr = lr), max_grad_norm=5)
             self.optimizer = optimizer
 
         self.logger.info("Optimizer: %s, Scheduler: %s" % (self.optimizer.optimizer, self.optimizer.scheduler))
