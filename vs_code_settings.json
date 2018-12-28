@@ -117,3 +117,17 @@
     ],
     "spellright.notificationClass": "information",
 }
+
+
+// sftp configuration: add this to the project folder
+{   "name": "jiaoyusuo-38",
+    "protocol": "sftp",
+    "host": "xxxx",
+    "port": 22,
+    "username": "xxxx",
+    "password": "xxxx",
+    "remotePath": "xxxx",
+    "uploadOnSave": false,
+    "downloadOnOpen":true,
+    "syncMode": "update"
+}
